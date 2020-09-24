@@ -1,14 +1,42 @@
-# ms_persist
+# MS Persist
 
 A mixin that help you on handling model as a CRUD
 
 ## Getting Started
 
-This project is a starting point for a Dart
-[package](https://flutter.dev/developing-packages/),
-a library module containing code that can be shared easily across
-multiple Flutter or Dart projects.
+Is very simple to start use.
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+After set the lib in `pubspec.yaml` and run `flutter pub get`
+
+```dart
+import 'package:ms_persist/ms_persist.dart';
+
+class YourModel with Persist<YourModel> {
+  // .. a lot of another fields
+  //TODO: implement field uuid
+  @override
+  String uuid;
+
+  YourModel({this.uuid/*other fields*/});
+
+  //TODO: implement buildModel
+  @override
+  YourModel buildModel(Map<String, dynamic> map){
+    return YourModel(
+      uuid: map['uuid'],
+      );
+  }
+
+  //TODO: implement toMap
+  @override
+  Map<String, dynamic> toMap(){
+    return {
+      'uuid': this.uuid,
+      //TODO: add here every field or extra data that you want to save
+    };
+  }
+}
+```
+
+_That's all folks_
+I hope you enjoy this lib.
