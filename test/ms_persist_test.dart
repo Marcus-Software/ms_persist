@@ -1,13 +1,30 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ms_persist/ms_persist.dart';
+import 'mock/dump.dart';
 
 void main() {
-  test('adds one to input values', () {
-    final calculator = Calculator();
-    expect(calculator.addOne(2), 3);
-    expect(calculator.addOne(-7), -6);
-    expect(calculator.addOne(0), 1);
-    expect(() => calculator.addOne(null), throwsNoSuchMethodError);
+  test('must return a correct store name', () {
+    var dumb = Dumb();
+    expect(dumb.storeRef.name, 'Dumb');
+  });
+
+  test('must throw AssertError', () {
+    var dumb = Dumb(uuid: null);
+    expect(() async => await dumb.delete(), throwsAssertionError);
+  });
+
+  test('must save', () async {
+    var dumb = Dumb();
+    var savedDump = await dumb.save();
+    expect(dumb, isNotNull);
+    expect(savedDump.uuid, isNotNull);
+  });
+
+  test('must delete', () async {
+    var dumb = Dumb();
+    var savedDump = await dumb.save();
+    expect(savedDump.uuid, isNotNull);
+    expect(await savedDump.delete(), isTrue);
+    expect(await Dumb().findById(savedDump.uuid), isNull);
   });
 }
