@@ -1,0 +1,24 @@
+name: ms_persist
+description: A mixin that help you on handling model as a CRUD
+version: 0.0.1
+homepage: https:\\github.com\Marcus-Software\ms_persist.git
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+  flutter: ">=1.17.0 <2.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  path_provider: ">=1.6.0 <2.0.0"
+  sembast: ">=2.4.0 <3.0.0"
+  uuid: ">=2.2.0 <3.0.0"
+  path: ">=1.7.0 <2.0.0"
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: any
+
+flutter:
