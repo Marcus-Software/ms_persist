@@ -1,7 +1,7 @@
 name: ms_persist
 description: A mixin that help you on handling model as a CRUD
-version: 0.0.1
-homepage: https:\\github.com\Marcus-Software\ms_persist.git
+version: 0.1.0
+homepage: https://github.com/Marcus-Software/ms_persist
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
