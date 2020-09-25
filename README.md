@@ -38,5 +38,6 @@ class YourModel with Persist<YourModel> {
 }
 ```
 
-_That's all folks_
+_That's all folks!_
+
 I hope you enjoy this lib.

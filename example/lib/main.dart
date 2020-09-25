@@ -107,13 +107,13 @@ class Count with Persist<Count> {
 
   void decrement() => counter--;
 
-  // Every time the mixer [Persist] need build you object her will call this method
+  // Every time the mixer [Persist] need build you object, will call this method
   @override
   Count buildModel(Map<String, dynamic> map) {
     return Count(map['uuid'] as String, map['counter'] as int);
   }
 
-  // Every time the mixer [Persist] need persist.
+  // Every time the mixer [Persist] need persist, this method is called to serialize object
   @override
   Map<String, dynamic> toMap() => {
         'id': uuid,
