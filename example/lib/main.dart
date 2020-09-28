@@ -116,7 +116,7 @@ class Count with Persist<Count> {
   // Every time the mixer [Persist] need persist, this method is called to serialize object
   @override
   Map<String, dynamic> toMap() => {
-        'id': uuid,
+        'uuid': uuid,
         'counter': counter,
       };
 }

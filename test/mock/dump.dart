@@ -18,7 +18,7 @@ class Dumb with Persist<Dumb> {
   @override
   Map<String, dynamic> toMap() {
     return {
-      'id': this.uuid,
+      'uuid': this.uuid,
       'dummy': this.dummy,
       'title': this.title,
     };

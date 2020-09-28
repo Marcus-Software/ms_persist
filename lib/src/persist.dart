@@ -65,11 +65,10 @@ mixin Persist<T> {
   /// Throws [AssertionError] if [uuid] is null or empty.
   Future<bool> delete() async {
     _checkId();
+    var deleted = await storeRef.record(uuid).delete(await database);
     _controller.add(null);
     _controller.close();
-    return storeRef.record(uuid.toString()).delete(await database) == null
-        ? false
-        : true;
+    return deleted == null ? false : true;
   }
 
   /// Returns a new model with initial state
@@ -78,9 +77,9 @@ mixin Persist<T> {
 
   /// Looks in db for model with same [id]
   Future<T> findById(String id) async {
-    var record = await storeRef.record(id).get(await database);
+    var record = await storeRef.record(id).getSnapshot(await database);
     if (record == null) return null;
-    return _buildModel(record);
+    return _buildModel(record.value);
   }
 
   /// Returns `true` if current state is dirty.
@@ -91,8 +90,7 @@ mixin Persist<T> {
     return _initialState.diff(toMap()).isNotEmpty;
   }
 
-
-  /// List
+  /// List or search items in db
   Future<List<T>> list({Finder finder}) async {
     finder ??= Finder(sortOrders: [SortOrder('uuid')]);
     return (await storeRef.query(finder: finder).getSnapshots(await database))
@@ -115,7 +113,7 @@ mixin Persist<T> {
       'uuid': uuid ?? _uuid.v1(),
       'updatedAt': DateTime.now().toString(),
     };
-    await storeRef.record(data['id'].toString()).put(await database, data);
+    await storeRef.record(data['uuid'].toString()).put(await database, data);
     var model = this._buildModel(data);
     _controller.add(model);
     return model;

@@ -21,5 +21,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mockito: any
+  test_coverage: ^0.4.3
 
 flutter:

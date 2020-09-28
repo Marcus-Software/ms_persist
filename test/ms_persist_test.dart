@@ -21,7 +21,7 @@ void main() {
   });
 
   test('must delete', () async {
-    var dumb = Dumb();
+    var dumb = Dumb(title: 'Mr. Deleterson', dummy: 'Nothing');
     var savedDump = await dumb.save();
     expect(savedDump.uuid, isNotNull);
     expect(await savedDump.delete(), isTrue);
