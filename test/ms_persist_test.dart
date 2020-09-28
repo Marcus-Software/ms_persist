@@ -27,4 +27,15 @@ void main() {
     expect(await savedDump.delete(), isTrue);
     expect(await Dumb().findById(savedDump.uuid), isNull);
   });
+
+  test('must return true if is dirty', () async {
+    var dumb = await (Dumb(dummy: 'Nothing', title: 'Mr. Dummy').save());
+    dumb.title = 'New Title';
+    expect(dumb.isDirty(), isTrue);
+    expect(dumb.dirtyState().title, 'Mr. Dummy');
+    expect(dumb.title, 'New Title');
+    expect(dumb.isDirty(['title', 'dummy']), isFalse);
+    dumb.dummy = 'continue nothing';
+    expect(dumb.isDirty(['title', 'dummy']), isTrue);
+  });
 }
