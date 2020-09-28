@@ -1,6 +1,6 @@
 name: ms_persist
 description: A mixin that help you on handling model as a CRUD, you just need implement 3 overrides
-version: 0.1.0+1
+version: 0.2.0
 homepage: https://github.com/Marcus-Software/ms_persist
 
 environment:
@@ -14,6 +14,7 @@ dependencies:
   sembast: ">=2.4.0 <3.0.0"
   uuid: ">=2.2.0 <3.0.0"
   path: ">=1.7.0 <2.0.0"
+  ms_map_utils: ">= 0.7.0 <1.0.0"
 
 
 dev_dependencies:
