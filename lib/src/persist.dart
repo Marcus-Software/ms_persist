@@ -4,7 +4,8 @@ import 'package:ms_map_utils/ms_map_utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as pathProvider;
 import 'package:sembast/sembast.dart';
-import 'package:sembast/sembast_io.dart';
+import 'package:sembast_sqflite/sembast_sqflite.dart';
+import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:uuid/uuid.dart';
 
 Database _database;
@@ -33,7 +34,9 @@ mixin Persist<T> {
   /// Singleton that provides a [Database] instance
   static Future<Database> get database async {
     if (_database == null) {
-      _database = await databaseFactoryIo.openDatabase(await _dbPath);
+      _database = await (getDatabaseFactorySqflite(sqflite.databaseFactory))
+          .openDatabase(await _dbPath);
+      // _database = await databaseFactoryIo.openDatabase(await _dbPath);
     }
     return _database;
   }
