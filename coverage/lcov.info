@@ -2,13 +2,13 @@ SF:lib\src\persist.dart
 DA:13,3
 DA:15,1
 DA:16,2
-DA:17,2
+DA:17,0
 DA:24,0
 DA:25,0
 DA:26,0
 DA:35,1
-DA:37,3
-DA:38,3
+DA:37,2
+DA:38,2
 DA:50,1
 DA:51,3
 DA:52,1
@@ -48,5 +48,5 @@ DA:137,1
 DA:138,1
 DA:139,0
 LF:48
-LH:22
+LH:21
 end_of_record
