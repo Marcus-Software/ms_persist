@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ms_persist/ms_persist.dart';
 
@@ -21,7 +20,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({
+    required this.title,
+    super.key,
+  });
 
   final String title;
 
@@ -30,7 +32,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Count _count;
+  Count _count = Count();
 
   void _incrementCounter() {
     _count.increment();
@@ -48,12 +50,12 @@ class _MyHomePageState extends State<MyHomePage> {
               tooltip: 'Delete',
               onPressed: () async {
                 await _count.delete();
-                _count = null;
+                _count = Count();
                 setState(() {});
               })
         ],
       ),
-      body: FutureBuilder(
+      body: FutureBuilder<Count>(
         initialData: _count,
         future: () async {
           var list = await Count().list();
@@ -61,11 +63,12 @@ class _MyHomePageState extends State<MyHomePage> {
           return Count();
         }(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting)
+          if (snapshot.connectionState != ConnectionState.done)
             return Center(
               child: CircularProgressIndicator(),
             );
-          _count = snapshot.data;
+
+          _count = snapshot.data ?? Count();
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -73,13 +76,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 Text(
                   'You have pushed the button this many times:',
                 ),
-                StreamBuilder<Count>(
+                StreamBuilder<Count?>(
                     stream: _count.listenChanges(),
                     initialData: _count,
                     builder: (context, snapshot) {
                       return Text(
-                        '${snapshot.data.counter}',
-                        style: Theme.of(context).textTheme.headline4,
+                        '${snapshot.data?.counter}',
+                        style: Theme.of(context).textTheme.headlineMedium,
                       );
                     }),
               ],
@@ -98,10 +101,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class Count with Persist<Count> {
   // You must define a id field or method get id
-  String uuid;
+  String? uuid;
   int counter;
 
-  Count([this.uuid = '1', this.counter = 0]);
+  Count([this.uuid = null, this.counter = 0]);
 
   void increment() => counter++;
 
