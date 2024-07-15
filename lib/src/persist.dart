@@ -1,29 +1,23 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:ms_map_utils/ms_map_utils.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart' as pathProvider;
+import 'package:ms_persist/src/utils.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast_sqflite/sembast_sqflite.dart';
+import 'package:sembast_web/sembast_web.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqfliteFfi;
 import 'package:uuid/uuid.dart';
 
-Database _database;
+Database? _database;
 String _dbName = '_persist.db';
 final Uuid _uuid = Uuid();
 
-Future<String> get _dbPath async {
-  final appDocDir = await pathProvider.getApplicationDocumentsDirectory();
-  return path.join(appDocDir.path, 'databases', _dbName);
-}
-
 /// Define a dbName.
 /// Must set a name before any db operation or will use "_persist.db" as default value.
-///
-/// Throws [AssertionError] if [dbName] is null os empty string.
 void setDbName(String dbName) {
-  assert(dbName != null, 'dbName must be non null');
-  assert(dbName.isNotEmpty, 'dbName must be non empty');
   _dbName = dbName;
 }
 
@@ -33,29 +27,42 @@ void setDbName(String dbName) {
 mixin Persist<T> {
   /// Singleton that provides a [Database] instance
   static Future<Database> get database async {
-    if (_database == null) {
+    final db = _database;
+    if (db != null) return db;
+
+    var dbPath = await getDbPath(_dbName);
+    if (kIsWeb) {
+      _database = await databaseFactoryWeb.openDatabase(_dbName);
+    } else if (Platform.isWindows || Platform.isLinux) {
+      sqfliteFfi.sqfliteFfiInit();
+      _database =
+          await (getDatabaseFactorySqflite(sqfliteFfi.databaseFactoryFfi))
+              .openDatabase(dbPath);
+    } else {
       _database = await (getDatabaseFactorySqflite(sqflite.databaseFactory))
-          .openDatabase(await _dbPath);
-      // _database = await databaseFactoryIo.openDatabase(await _dbPath);
+          .openDatabase(dbPath);
     }
-    return _database;
+
+    return _database!;
   }
 
-  StoreRef<String, dynamic> _storeRef;
-  StreamController<T> _controller = StreamController();
-  Map<String, dynamic> _initialState = {};
+  StoreRef<String, dynamic>? _storeRef;
+  StreamController<T?> _controller = StreamController.broadcast();
+  Map<String, dynamic> _lastSavedState = {};
 
   /// A pointer to a store.
   ///
+  /// The store is created based on the model name.
   StoreRef<String, dynamic> get storeRef {
     _storeRef ??= StoreRef(T.toString());
-    return _storeRef;
+
+    return _storeRef!;
   }
 
   /// Main id that mixin uses to saves, retrieves or deletes in [Database].
   ///
   /// Must be override by model.
-  String get uuid;
+  String? uuid;
 
   /// Build a new model from a [map].
   ///
@@ -64,50 +71,61 @@ mixin Persist<T> {
 
   /// Deletes a record.
   /// Return `true` if record was deleted or `false` if record does not exists
-  ///
-  /// Throws [AssertionError] if [uuid] is null or empty.
   Future<bool> delete() async {
     onBeforeDelete(this as T);
     if (uuid == null) return false;
 
     var deleted = await storeRef.record(uuid!).delete(await database);
-    _controller.add(null);
+    _controller.add(null as T?);
     dispose();
     onAfterDelete(this as T);
 
     return deleted == null ? false : true;
   }
 
-  /// Returns a new model with initial state
+  /// Returns a new model initial state before any change saved.
   T dirtyState() =>
-      this.buildModel({...toMap(), ...toMap().diff(_initialState)});
+      this.buildModel({...toMap(), ...diff(toMap(), _lastSavedState)});
 
   /// Looks in db for model with same [id]
-  Future<T> findById(String id) async {
+  Future<T?> findById(String id) async {
     var record = await storeRef.record(id).getSnapshot(await database);
     if (record == null) return null;
+
     return _buildModel(record.value);
   }
 
   /// Returns `true` if current state is dirty.
   /// Optional [fields] check only if in those fields is dirty.
-  bool isDirty([List fields]) {
-    if (fields != null)
-      return _initialState.diff(toMap()).containsKeys(fields ?? []);
-    return _initialState.diff(toMap()).isNotEmpty;
+  bool isDirty([List<Object>? fields]) {
+    var diffState = diff(toMap(), _lastSavedState);
+    if (fields != null) return diffState.containsKeys(fields);
+
+    return diffState.isNotEmpty;
   }
 
   /// List or search items in db
-  Future<List<T>> list({Finder finder}) async {
+  Future<List<T>> list({Finder? finder}) async {
     finder ??= Finder(sortOrders: [SortOrder('uuid')]);
-    return (await storeRef.query(finder: finder).getSnapshots(await database))
-        .map((e) => _buildModel(e.value))
-        .toList();
+    var res = await storeRef.query(finder: finder).getSnapshots(await database);
+
+    return res.map((e) => _buildModel(e.value)).toList();
   }
 
   /// Emit a event every time has any change in current instance.
   /// Will emit a `null` as last event and closes stream when [delete] is called
-  Stream<T> listenChanges() => _controller.stream;
+  Stream<T?> listenChanges() => _controller.stream;
+
+  /// Refresh current instance with db data.
+  Future<T?> refresh() async {
+    var record = await storeRef.record(uuid!).getSnapshot(await database);
+    if (record == null) return null;
+    final model = _buildModel(record.value);
+    _controller.add(model);
+    (model as Persist)._controller = _controller;
+
+    return model;
+  }
 
   /// Save or update the current state.
   /// Return a new instance.
@@ -121,8 +139,11 @@ mixin Persist<T> {
       'uuid': _genUUID(),
       'updatedAt': DateTime.now().toString(),
     };
+
+    _lastSavedState = data;
     await storeRef.record(data['uuid'].toString()).put(await database, data);
     var model = this._buildModel(data);
+    (model as Persist)._controller = _controller;
     _controller.add(model);
     onAfterSave(model);
 
@@ -134,9 +155,11 @@ mixin Persist<T> {
   /// Must be override by model.
   Map<String, dynamic> toMap();
 
-  T _buildModel(Map map) {
+  /// Build a new model from a [map] and set the last saved state.
+  T _buildModel(Map<String, dynamic> map) {
     var model = buildModel(map);
-    (model as Persist)._initialState = map;
+    (model as Persist)._lastSavedState = map;
+
     return model;
   }
 
