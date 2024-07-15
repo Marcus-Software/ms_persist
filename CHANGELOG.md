@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.0] - 2024/07/15
+
+* Hooks onBefore(Save|Delete) and onAfter(Save|Delete) are now called in the method `save` and `delete` respectively.
+
 ## [1.0.0] - 2020/09/24
 
 * Using sembast_sqflite instead of sembast

@@ -67,10 +67,14 @@ mixin Persist<T> {
   ///
   /// Throws [AssertionError] if [uuid] is null or empty.
   Future<bool> delete() async {
-    _checkId();
-    var deleted = await storeRef.record(uuid).delete(await database);
+    onBeforeDelete(this as T);
+    if (uuid == null) return false;
+
+    var deleted = await storeRef.record(uuid!).delete(await database);
     _controller.add(null);
-    _controller.close();
+    dispose();
+    onAfterDelete(this as T);
+
     return deleted == null ? false : true;
   }
 
@@ -108,17 +112,20 @@ mixin Persist<T> {
   /// Save or update the current state.
   /// Return a new instance.
   /// The save method do not update current instance.
-  Future<T> save([Map<String, dynamic> overrideData]) async {
+  Future<T> save([Map<String, dynamic>? overrideData]) async {
+    onBeforeSave(this as T, uuid != null);
     var data = {
       'createdAt': DateTime.now().toString(),
       ...this.toMap(),
       ...overrideData ?? {},
-      'uuid': uuid ?? _uuid.v1(),
+      'uuid': _genUUID(),
       'updatedAt': DateTime.now().toString(),
     };
     await storeRef.record(data['uuid'].toString()).put(await database, data);
     var model = this._buildModel(data);
     _controller.add(model);
+    onAfterSave(model);
+
     return model;
   }
 
@@ -133,9 +140,24 @@ mixin Persist<T> {
     return model;
   }
 
-  /// Throws [AssertionError] if [uuid] is null or empty.
-  void _checkId() {
-    assert(uuid != null, 'id key must be non null');
-    assert(uuid != '', 'id key must be non empty');
+  /// Generate a new uuid
+  String _genUUID() => uuid ?? _uuid.v1();
+
+  /// Close the stream controller
+  @mustCallSuper
+  void dispose() {
+    _controller.close();
   }
+
+  /// Hook to run before save
+  void onBeforeSave(T data, bool update) {}
+
+  /// Hook to run after save
+  void onAfterSave(T data) {}
+
+  /// Hook to run before delete
+  void onBeforeDelete(T data) {}
+
+  /// Hook to run after delete
+  void onAfterDelete(T data) {}
 }
