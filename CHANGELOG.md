@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.1] - 2024/07/15
+
+* Hotfix
+
 ## [2.1.0] - 2024/07/15
 
 * Hooks onBefore(Save|Delete) and onAfter(Save|Delete) are now called in the method `save` and `delete` respectively.

@@ -1,6 +1,6 @@
 name: ms_persist
 description: A mixin that help you on handling model as a CRUD, you just need implement 3 overrides
-version: 2.0.0
+version: 2.1.1
 homepage: https://github.com/Marcus-Software/ms_persist
 
 environment:
