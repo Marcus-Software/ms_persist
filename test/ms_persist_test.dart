@@ -86,4 +86,8 @@ void main() {
     saved = await saved.save();
     await saved.delete();
   });
+
+  test('must return storeName', () {
+    expect(Dumb().storeName, 'Dumb');
+  });
 }

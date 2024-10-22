@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.2.0] - 2024/10/22
+
+* Added for storeName 
+
 ## [2.1.1] - 2024/07/15
 
 * Hotfix

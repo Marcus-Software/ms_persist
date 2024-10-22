@@ -50,19 +50,22 @@ mixin Persist<T> {
   StreamController<T?> _controller = StreamController.broadcast();
   Map<String, dynamic> _lastSavedState = {};
 
-  /// A pointer to a store.
-  ///
-  /// The store is created based on the model name.
-  StoreRef<String, dynamic> get storeRef {
-    _storeRef ??= StoreRef(T.toString());
-
-    return _storeRef!;
-  }
-
   /// Main id that mixin uses to saves, retrieves or deletes in [Database].
   ///
   /// Must be override by model.
   String? uuid;
+
+  /// A pointer to a store.
+  ///
+  /// The store is created based on the model name.
+  StoreRef<String, dynamic> get storeRef {
+    _storeRef ??= StoreRef(storeName);
+
+    return _storeRef!;
+  }
+
+  /// The model name.
+  String get storeName => T.toString();
 
   /// Build a new model from a [map].
   ///
@@ -86,6 +89,12 @@ mixin Persist<T> {
   /// Returns a new model initial state before any change saved.
   T dirtyState() =>
       this.buildModel({...toMap(), ...diff(toMap(), _lastSavedState)});
+
+  /// Close the stream controller
+  @mustCallSuper
+  void dispose() {
+    _controller.close();
+  }
 
   /// Looks in db for model with same [id]
   Future<T?> findById(String id) async {
@@ -115,6 +124,18 @@ mixin Persist<T> {
   /// Emit a event every time has any change in current instance.
   /// Will emit a `null` as last event and closes stream when [delete] is called
   Stream<T?> listenChanges() => _controller.stream;
+
+  /// Hook to run after delete
+  void onAfterDelete(T data) {}
+
+  /// Hook to run after save
+  void onAfterSave(T data) {}
+
+  /// Hook to run before delete
+  void onBeforeDelete(T data) {}
+
+  /// Hook to run before save
+  void onBeforeSave(T data, bool update) {}
 
   /// Refresh current instance with db data.
   Future<T?> refresh() async {
@@ -165,22 +186,4 @@ mixin Persist<T> {
 
   /// Generate a new uuid
   String _genUUID() => uuid ?? _uuid.v1();
-
-  /// Close the stream controller
-  @mustCallSuper
-  void dispose() {
-    _controller.close();
-  }
-
-  /// Hook to run before save
-  void onBeforeSave(T data, bool update) {}
-
-  /// Hook to run after save
-  void onAfterSave(T data) {}
-
-  /// Hook to run before delete
-  void onBeforeDelete(T data) {}
-
-  /// Hook to run after delete
-  void onAfterDelete(T data) {}
 }
