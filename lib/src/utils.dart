@@ -10,6 +10,9 @@ Future<String> getDbPath(String dbName) async {
     return dbName;
   } else if (Platform.isWindows) {
     dbPath = Platform.environment['LOCALAPPDATA'].toString();
+  } else if (Platform.isMacOS) {
+    dbPath = path.join(Platform.environment['HOME'].toString(), 'Library',
+        'Application Support');
   } else {
     final appDocDir = await pathProvider.getApplicationDocumentsDirectory();
     dbPath = appDocDir.path;
