@@ -1,13 +1,11 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:ms_persist/ms_persist.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqfliteFfi;
+import 'package:test/test.dart';
 
 import 'mock/dump.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
   setUpAll(() async {
     setDbName('testDb.db');
     sqflite.databaseFactory = sqfliteFfi.databaseFactoryFfi;

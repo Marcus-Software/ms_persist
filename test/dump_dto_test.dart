@@ -1,7 +1,7 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:ms_persist/ms_persist.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqfliteFfi;
+import 'package:test/test.dart';
 
 import 'mock/dump_dto.dart';
 
