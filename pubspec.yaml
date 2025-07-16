@@ -18,15 +18,10 @@ dependencies:
   sqflite: ">=2.0.0 <3.0.0"
   uuid: ">=3.0.0 <5.0.0"
   sqflite_common_ffi: ^2.3.6
-  sembast: ^3.8.5+1
-  meta: ^1.16.0
 
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
   dependency_validator: ^5.0.2
   mockito: any
-
-flutter:
+  test: ^1.26.2
 
