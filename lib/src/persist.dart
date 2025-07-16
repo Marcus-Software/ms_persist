@@ -179,7 +179,7 @@ mixin Persist<T> {
   /// Build a new model from a [map] and set the last saved state.
   T _buildModel(Map<String, dynamic> map) {
     var model = buildModel(map);
-    (model as Persist)._lastSavedState = map;
+    _lastSavedState = map;
 
     return model;
   }

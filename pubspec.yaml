@@ -1,6 +1,6 @@
 name: ms_persist
 description: A mixin that help you on handling model as a CRUD, you just need implement 3 overrides
-version: 2.2.0
+version: 2.2.1
 homepage: https://github.com/Marcus-Software/ms_persist
 
 environment:
@@ -17,15 +17,15 @@ dependencies:
   sembast_sqflite: ">=2.0.0 <3.0.0"
   sqflite: ">=2.0.0 <3.0.0"
   uuid: ">=3.0.0 <5.0.0"
-  sqflite_common_ffi: ^2.3.4
-  sembast: ^3.7.5
-  meta: ^1.15.0
+  sqflite_common_ffi: ^2.3.6
+  sembast: ^3.8.5+1
+  meta: ^1.16.0
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  dependency_validator: ^4.1.1
+  dependency_validator: ^5.0.2
   mockito: any
 
 flutter:
