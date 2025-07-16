@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:ms_map_utils/ms_map_utils.dart';
 import 'package:ms_persist/src/utils.dart';
-import 'package:sembast/sembast.dart';
 import 'package:sembast_sqflite/sembast_sqflite.dart';
 import 'package:sembast_web/sembast_web.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
@@ -75,13 +74,13 @@ mixin Persist<T> {
   /// Deletes a record.
   /// Return `true` if record was deleted or `false` if record does not exists
   Future<bool> delete() async {
-    onBeforeDelete(this as T);
+    onBeforeDelete(this is T ? this as T : null as T?);
     if (uuid == null) return false;
 
     var deleted = await storeRef.record(uuid!).delete(await database);
     _controller.add(null as T?);
     dispose();
-    onAfterDelete(this as T);
+    onAfterDelete(this is T ? this as T : null as T?);
 
     return deleted == null ? false : true;
   }
@@ -126,16 +125,16 @@ mixin Persist<T> {
   Stream<T?> listenChanges() => _controller.stream;
 
   /// Hook to run after delete
-  void onAfterDelete(T data) {}
+  void onAfterDelete(T? data) {}
 
   /// Hook to run after save
-  void onAfterSave(T data) {}
+  void onAfterSave(T? data) {}
 
   /// Hook to run before delete
-  void onBeforeDelete(T data) {}
+  void onBeforeDelete(T? data) {}
 
   /// Hook to run before save
-  void onBeforeSave(T data, bool update) {}
+  void onBeforeSave(T? data, bool update) {}
 
   /// Refresh current instance with db data.
   Future<T?> refresh() async {
@@ -143,7 +142,8 @@ mixin Persist<T> {
     if (record == null) return null;
     final model = _buildModel(record.value);
     _controller.add(model);
-    (model as Persist)._controller = _controller;
+    (model is Persist ? model as Persist : this as Persist)._controller =
+        _controller;
 
     return model;
   }
@@ -152,7 +152,7 @@ mixin Persist<T> {
   /// Return a new instance.
   /// The save method do not update current instance.
   Future<T> save([Map<String, dynamic>? overrideData]) async {
-    onBeforeSave(this as T, uuid != null);
+    onBeforeSave(this is T ? this as T : null, uuid != null);
     var data = {
       'createdAt': DateTime.now().toString(),
       ...this.toMap(),
@@ -164,7 +164,8 @@ mixin Persist<T> {
     _lastSavedState = data;
     await storeRef.record(data['uuid'].toString()).put(await database, data);
     var model = this._buildModel(data);
-    (model as Persist)._controller = _controller;
+    (model is Persist ? model as Persist : this as Persist)._controller =
+        _controller;
     _controller.add(model);
     onAfterSave(model);
 
