@@ -1,13 +1,25 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ms_persist/ms_persist.dart';
+import 'package:sqflite/sqflite.dart' as sqflite;
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqfliteFfi;
 
 import 'mock/dump.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(() {
+  setUpAll(() async {
     setDbName('testDb.db');
+    sqflite.databaseFactory = sqfliteFfi.databaseFactoryFfi;
+  });
+
+  tearDownAll(() async {
+    final list = await Dumb().list();
+    final deletes = <Future>[];
+    for (final dd in list) {
+      deletes.add(dd.delete());
+    }
+    await Future.wait(deletes);
   });
 
   test('must return a correct store name', () {

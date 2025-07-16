@@ -36,22 +36,22 @@ class Dumb with Persist<Dumb> {
   Dumb buildModel(Map<String, dynamic> map) => Dumb.fromMap(map);
 
   @override
-  void onBeforeSave(Dumb b, bool update) {
+  void onBeforeSave(Dumb? b, bool update) {
     beforeSaveHits++;
   }
 
   @override
-  void onAfterSave(Dumb b) {
+  void onAfterSave(Dumb? b) {
     afterSaveHits++;
   }
 
   @override
-  void onBeforeDelete(Dumb b) {
+  void onBeforeDelete(Dumb? b) {
     beforeDeleteHits++;
   }
 
   @override
-  void onAfterDelete(Dumb b) {
+  void onAfterDelete(Dumb? b) {
     afterDeleteHits++;
   }
 }
